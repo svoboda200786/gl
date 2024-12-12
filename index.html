@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en" >
+<head>
+  <meta charset="UTF-8">
+  <title>WebGL - 2D Geometry Matrix Transform with simpler functions</title>
+  <link rel="stylesheet" href="./style.css">
+
+</head>
+<body>
+<!-- partial:index.partial.html -->
+<canvas id="canvas"></canvas>
+<div id="uiContainer">
+  <div id="ui">
+    <div id="x"></div>
+    <div id="y"></div>
+    <div id="z"></div>
+    <div id="angleX"></div>
+    <div id="angleY"></div>
+    <div id="angleZ"></div>
+    <div id="scaleX"></div>
+    <div id="scaleY"></div>
+    <div id="scaleZ"></div>
+    <div id="fieldOfView"></div>     
+    <div id="cameraAngle"></div> 
+    <div id="uv"></div>        
+  </div>
+</div>
+<!-- vertex shader -->
+<script  id="vertex-shader-2d" type="x-shader/x-vertex">
+attribute vec4 a_position;
+attribute vec3 a_normal;
+attribute vec2 a_texcoord;
+
+uniform mat4 u_matrix;
+uniform vec3 u_resolution;
+
+uniform mat4 u_x_rot_mat;
+uniform mat4 u_y_rot_mat;
+uniform mat4 u_z_rot_mat;
+uniform mat4 u_y_rot_camera_mat;
+uniform mat4 u_trans_camera_mat;
+uniform mat4 u_trans_mat;
+uniform mat4 u_scale_mat;
+uniform mat4 u_proj_mat;
+uniform mat4 u_camera_mat;
+
+varying vec3 v_normal;
+varying vec3 resolution;
+varying vec2 v_texcoord;
+
+void main() {
+  gl_Position =  u_proj_mat * u_trans_mat * u_scale_mat * u_x_rot_mat * u_y_rot_mat * u_z_rot_mat * a_position;
+  gl_Position *= u_y_rot_camera_mat * u_trans_camera_mat;  
+  gl_Position = vec4(gl_Position.xyz, (1.0 + gl_Position.z) );
+    v_normal = a_normal;
+    resolution = u_resolution;
+    v_texcoord = a_texcoord;
+}
+</script>
+<!-- fragment shader -->
+<script  id="fragment-shader-2d" type="x-shader/x-fragment">
+precision mediump float;
+varying vec3 resolution;
+varying vec3 v_normal;
+varying vec2 v_texcoord;
+
+uniform vec4 u_color;
+uniform sampler2D u_texture;
+uniform float u_uv;
+
+void main() {
+    vec3 normal = normalize(v_normal * resolution);
+    float light = dot(normal, vec3(0.5, 0.7, 1));
+    gl_FragColor = u_color;
+
+    gl_FragColor = texture2D(u_texture, v_texcoord);
+    gl_FragColor.rgb *= light;
+}
+</script><!--
+for most samples webgl-utils only provides shader compiling/linking and
+canvas resizing because why clutter the examples with code that's the same in every sample.
+See https://webglfundamentals.org/webgl/lessons/webgl-boilerplate.html
+and https://webglfundamentals.org/webgl/lessons/webgl-resizing-the-canvas.html
+for webgl-utils, m3, m4, and webgl-lessons-ui.
+-->
+<script src="arr.js"></script>
+<script src="arr2.js"></script>
+<script src="arr3.js"></script>
+<script src="https://webglfundamentals.org/webgl/resources/webgl-utils.js"></script>
+<script src="https://webglfundamentals.org/webgl/resources/webgl-lessons-ui.js"></script>
+<!-- partial -->
+  <script  src="./script.js"></script>
+
+</body>
+</html>
